@@ -2,16 +2,17 @@ const express = require("express");
 const { MongoClient } = require("mongodb");
 require("dotenv").config();
 const cors = require("cors");
-const jwt = require("jsonwebtoken");
 
-app.use(cors());
-app.use(express.json());
+const jwt = require("jsonwebtoken");
 
 process.env.TOKEN_SECRET;
 
 const ObjectId = require("mongodb").ObjectId;
 const app = express();
 const port = process.env.PORT || 5000;
+
+app.use(cors());
+app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.fs9pd.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -20,6 +21,7 @@ const client = new MongoClient(uri, {
 });
 
 //JWT Auth
+
 const generateJWTToken = (user) => {
     return jwt.sign(user, process.env.TOKEN_SECRET, { expiresIn: "500s" });
 };
@@ -34,6 +36,8 @@ const verifyJWTToken = (req, res, next) => {
         next();
     } catch {}
 };
+
+//
 
 async function run() {
     try {
@@ -54,8 +58,12 @@ async function run() {
                 password: "jwttoken",
             };
             const token = generateJWTToken(newUser);
+
             const query = { email: userInfo.email };
             const user = await jobPortalUsers.findOne(query);
+
+            console.log("khujlam", userInfo);
+            console.log("paisi", user);
 
             const matchedUser = {
                 name: user.name,
@@ -71,7 +79,7 @@ async function run() {
             }
         });
 
-        //-----------------------------------------
+        //----------------------------------------------------
 
         app.post("/jobPortalUsers", async (req, res) => {
             const newUser = req.body;
@@ -83,7 +91,6 @@ async function run() {
             const newUser = req.body;
 
             const requester = req.decodedEmail;
-
             if (requester) {
                 const result = await jobPortalAllJobs.insertOne(newUser);
                 res.json({ message: "added successfully" });
@@ -97,8 +104,6 @@ async function run() {
             const blogs = await cursor.toArray();
             res.send(blogs);
         });
-
-        // // DELETE  API
 
         //Delete Single Product
         app.delete("/jobs/:id", async (req, res) => {
@@ -115,7 +120,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-    res.send("Running ST ");
+    res.send("Tech Foring running ");
 });
 app.get("/morning", (req, res) => {
     res.send("Morning");
@@ -125,5 +130,5 @@ app.get("/hello", (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log("ST running at", port);
+    console.log("Tech Foring running at", port);
 });
